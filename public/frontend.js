@@ -1,62 +1,64 @@
-// LOAD CHARACTERS
-async function loadCharacters() {
-    const res = await fetch("https://comedyforge.onrender.com/characters");
-    const data = await res.json();
+const output = document.getElementById("output");
+const charactersDiv = document.getElementById("characters");
 
-    const container = document.getElementById("characters");
-    container.innerHTML = "";
+const API_BASE = "https://comedyforge.onrender.com";
 
-    data.forEach(char => {
-        container.innerHTML += `
-            <div class="character-card">
+// Generate Scene
+document.getElementById("sceneBtn").addEventListener("click", async () => {
+    output.innerHTML = "Loading scene...";
+    charactersDiv.innerHTML = "";
+
+    try {
+        const res = await fetch(`${API_BASE}/scene`);
+        const data = await res.json();
+        output.innerHTML = data.scene || "No scene returned.";
+    } catch (err) {
+        output.innerHTML = "Error generating scene.";
+        console.error(err);
+    }
+});
+
+// Chaos Mode
+document.getElementById("chaosBtn").addEventListener("click", async () => {
+    output.innerHTML = "Unleashing chaos...";
+    charactersDiv.innerHTML = "";
+
+    try {
+        const res = await fetch(`${API_BASE}/chaos`);
+        const data = await res.json();
+        output.innerHTML = data.chaos || "Chaos failed.";
+    } catch (err) {
+        output.innerHTML = "Chaos Mode error.";
+        console.error(err);
+    }
+});
+
+// Show Characters
+document.getElementById("charactersBtn").addEventListener("click", async () => {
+    output.innerHTML = "Loading characters...";
+    charactersDiv.innerHTML = "";
+
+    try {
+        const res = await fetch(`${API_BASE}/characters`);
+        const data = await res.json();
+
+        output.innerHTML = "Characters Loaded";
+
+        data.characters.forEach(char => {
+            const card = document.createElement("div");
+            card.className = "character-card";
+
+            card.innerHTML = `
+                <img src="public/images/${char.image}" alt="${char.name}">
                 <h3>${char.name}</h3>
                 <p>${char.description}</p>
-            </div>
-        `;
-    });
-}
+            `;
 
-// NORMAL SCENE GENERATOR
-document.getElementById("generate-btn").addEventListener("click", async () => {
-    const prompt = document.getElementById("scene-prompt").value;
+            charactersDiv.appendChild(card);
+        });
 
-    const res = await fetch("https://comedyforge.onrender.com/scene", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-    });
-
-    const data = await res.json();
-    renderScene(data);
+    } catch (err) {
+        output.innerHTML = "Error loading characters.";
+        console.error(err);
+    }
 });
-
-// CHAOS MODE
-document.getElementById("chaos-btn").addEventListener("click", async () => {
-    const res = await fetch("https://comedyforge.onrender.com/chaos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-    });
-
-    const data = await res.json();
-    renderScene(data);
-});
-
-// RENDER SCENE
-function renderScene(data) {
-    document.getElementById("scene-output").innerHTML = `
-        <h3>${data.title}</h3>
-        <p>${data.description}</p>
-
-        <h4>Beat Map</h4>
-        <pre>${data.beats}</pre>
-
-        <h4>Dialogue</h4>
-        <pre>${data.dialogue}</pre>
-
-        <h4>Camera Notes</h4>
-        <pre>${data.camera}</pre>
-    `;
-}
-
-// INIT
-loadCharacters();
